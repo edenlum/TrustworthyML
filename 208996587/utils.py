@@ -93,7 +93,9 @@ def run_blackbox_attack(attack, data_loader, targeted, device, n_classes=4):
     labels = []
     num_queries = []
     
-    for x, y in data_loader:
+    from tqdm import tqdm
+
+    for x, y in tqdm(data_loader):
         x, y = x.to(device), y.to(device)
         if targeted:
             y = (y + torch.randint(1, n_classes, size=(len(y),)).to(device)) % n_classes

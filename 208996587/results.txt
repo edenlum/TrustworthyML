@@ -6,3 +6,61 @@ White-box attack:
 Untargeted black-box attack (momentum=0.00):
 - success rate: 0.1800
 - median(# queries): 19649
+
+
+
+!git clone https://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@github.com/edenlum/TrustworthyML.git
+%cd TrustworthyML/208996587
+
+Cloning into 'TrustworthyML'...
+remote: Enumerating objects: 38, done.
+remote: Counting objects: 100% (38/38), done.
+remote: Compressing objects: 100% (30/30), done.
+remote: Total 38 (delta 9), reused 33 (delta 7), pack-reused 0
+Unpacking objects: 100% (38/38), 6.62 MiB | 11.26 MiB/s, done.
+/content/TrustworthyML/208996587
+
+!python3 main_a.py
+
+Device: cuda:0
+The test accuracy of the model is: 0.8750
+White-box attack:
+	- untargeted success rate: 0.9850
+	- targeted success rate: 0.9350
+Untargeted black-box attack (momentum=0.00):
+	- success rate: 0.9300
+	- median(# queries): 19649
+Targeted black-box attack (momentum=0.00):
+	- success rate: 0.7600
+	- median(# queries): 19649
+Untargeted black-box attack (momentum=0.90):
+	- success rate: 0.9650
+	- median(# queries): 16040
+Targeted black-box attack (momentum=0.90):
+	- success rate: 0.8650
+	- median(# queries): 19649
+
+
+Device: cuda:0
+The test accuracy of the model is: 0.8750
+White-box attack:
+100% 13/13 [00:00<00:00, 19.32it/s]
+	- untargeted success rate: 0.9850
+100% 13/13 [00:01<00:00, 12.10it/s]
+	- targeted success rate: 0.9350
+100% 13/13 [03:28<00:00, 16.00s/it]
+Untargeted black-box attack (momentum=0.00):
+	- success rate: 0.9350
+	- median(# queries): 3600
+100% 13/13 [03:50<00:00, 17.70s/it]
+Targeted black-box attack (momentum=0.00):
+	- success rate: 0.7650
+	- median(# queries): 6400
+100% 13/13 [02:43<00:00, 12.54s/it]
+Untargeted black-box attack (momentum=0.90):
+	- success rate: 0.9650
+	- median(# queries): 2800
+100% 13/13 [03:38<00:00, 16.82s/it]
+Targeted black-box attack (momentum=0.90):
+	- success rate: 0.8600
+	- median(# queries): 4400

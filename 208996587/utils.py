@@ -64,7 +64,18 @@ def run_whitebox_attack(attack, data_loader, targeted, device, n_classes=4):
     2- True labels in case of untargeted attacks, and target labels in
        case of targeted attacks.
     """
-    pass # FILL ME
+    x_advs = []
+    labels = []
+    from tqdm import tqdm
+
+    for x, y in tqdm(data_loader):
+        x, y = x.to(device), y.to(device)
+        if targeted:
+            y = (y + torch.randint(1, n_classes, size=(len(y),))) % n_classes
+        x_adv = attack.execute(x, y, targeted=targeted)
+        x_advs.append(x_adv)
+        labels.append(y)
+    return torch.cat(x_advs), torch.cat(labels)
 
 def run_blackbox_attack(attack, data_loader, targeted, device, n_classes=4):
     """
@@ -78,7 +89,21 @@ def run_blackbox_attack(attack, data_loader, targeted, device, n_classes=4):
        case of targeted attacks.
     3- The number of queries made to create each adversarial example.
     """
-    pass # FILL ME
+    x_advs = []
+    labels = []
+    num_queries = []
+    
+    from tqdm import tqdm
+
+    for x, y in tqdm(data_loader):
+        x, y = x.to(device), y.to(device)
+        if targeted:
+            y = (y + torch.randint(1, n_classes, size=(len(y),))) % n_classes
+        x_adv, queries = attack.execute(x, y, targeted=targeted)
+        x_advs.append(x_adv)
+        labels.append(y)
+        num_queries.append(queries)
+    return torch.cat(x_advs), torch.cat(labels), torch.cat(num_queries)
 
 def compute_attack_success(model, x_adv, y, batch_size, targeted, device):
     """
@@ -86,7 +111,21 @@ def compute_attack_success(model, x_adv, y, batch_size, targeted, device):
     attacks. y contains the true labels in case of untargeted attacks,
     and the target labels in case of targeted attacks.
     """
-    pass # FILL ME
+    dataloader = torch.utils.data.DataLoader(
+        torch.utils.data.TensorDataset(x_adv, y),
+        batch_size=batch_size
+    )
+    success = 0
+    for x_batch, y_batch in dataloader:
+        x_batch = x_batch.to(device)
+        y_batch = y_batch.to(device)
+        y_pred = model(x_batch)
+        if targeted:
+            success += (y_pred.argmax(dim=1) == y_batch).sum().item()
+        else:
+            success += (y_pred.argmax(dim=1) != y_batch).sum().item()
+    return success / len(y)
+        
 
 def binary(num):
     """

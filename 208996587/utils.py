@@ -71,7 +71,7 @@ def run_whitebox_attack(attack, data_loader, targeted, device, n_classes=4):
     for x, y in tqdm(data_loader):
         x, y = x.to(device), y.to(device)
         if targeted:
-            y = (y + torch.randint(1, n_classes, size=(len(y),))) % n_classes
+            y = (y + torch.randint(1, n_classes, size=(len(y),)).to(device)) % n_classes
         x_adv = attack.execute(x, y, targeted=targeted)
         x_advs.append(x_adv)
         labels.append(y)
@@ -93,12 +93,10 @@ def run_blackbox_attack(attack, data_loader, targeted, device, n_classes=4):
     labels = []
     num_queries = []
     
-    from tqdm import tqdm
-
-    for x, y in tqdm(data_loader):
+    for x, y in data_loader:
         x, y = x.to(device), y.to(device)
         if targeted:
-            y = (y + torch.randint(1, n_classes, size=(len(y),))) % n_classes
+            y = (y + torch.randint(1, n_classes, size=(len(y),)).to(device)) % n_classes
         x_adv, queries = attack.execute(x, y, targeted=targeted)
         x_advs.append(x_adv)
         labels.append(y)

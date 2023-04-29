@@ -35,14 +35,14 @@ wb_attack = PGDAttack(model)
 bb_attack = NESBBoxPGDAttack(model)
 
 # execute white-box
-# print('White-box attack:')
-# for targeted in [False, True]:
-#     x_adv, y = run_whitebox_attack(wb_attack, data_loader, targeted, device)
-#     sr = compute_attack_success(model, x_adv, y, consts.BATCH_SIZE, targeted, device)
-#     if targeted:
-#         print(f'\t- targeted success rate: {sr:0.4f}')
-#     else:
-#         print(f'\t- untargeted success rate: {sr:0.4f}')
+print('White-box attack:')
+for targeted in [False, True]:
+    x_adv, y = run_whitebox_attack(wb_attack, data_loader, targeted, device)
+    sr = compute_attack_success(model, x_adv, y, consts.BATCH_SIZE, targeted, device)
+    if targeted:
+        print(f'\t- targeted success rate: {sr:0.4f}')
+    else:
+        print(f'\t- untargeted success rate: {sr:0.4f}')
 
 # excecute targeted and untargeted black-box attacks w/ and wo/ momentum
 n_queries_all = []

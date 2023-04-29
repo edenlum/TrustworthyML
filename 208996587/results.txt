@@ -1,52 +1,17 @@
-The test accuracy of the model is: 0.8750
-White-box attack:
-	- untargeted success rate: 0.9800
-	- targeted success rate: 0.9600
-
-Untargeted black-box attack (momentum=0.00):
-- success rate: 0.1800
-- median(# queries): 19649
-
-
 Device: cuda:0
 The test accuracy of the model is: 0.8750
 White-box attack:
 	- untargeted success rate: 0.9850
 	- targeted success rate: 0.9350
-Untargeted black-box attack (momentum=0.00):
-	- success rate: 0.9300
-	- median(# queries): 19649
-Targeted black-box attack (momentum=0.00):
-	- success rate: 0.7600
-	- median(# queries): 19649
-Untargeted black-box attack (momentum=0.90):
-	- success rate: 0.9650
-	- median(# queries): 16040
-Targeted black-box attack (momentum=0.90):
-	- success rate: 0.8650
-	- median(# queries): 19649
-
-
-Device: cuda:0
-The test accuracy of the model is: 0.8750
-White-box attack:
-100% 13/13 [00:00<00:00, 19.32it/s]
-	- untargeted success rate: 0.9850
-100% 13/13 [00:01<00:00, 12.10it/s]
-	- targeted success rate: 0.9350
-100% 13/13 [03:28<00:00, 16.00s/it]
 Untargeted black-box attack (momentum=0.00):
 	- success rate: 0.9350
 	- median(# queries): 3600
-100% 13/13 [03:50<00:00, 17.70s/it]
 Targeted black-box attack (momentum=0.00):
 	- success rate: 0.7650
 	- median(# queries): 6400
-100% 13/13 [02:43<00:00, 12.54s/it]
 Untargeted black-box attack (momentum=0.90):
 	- success rate: 0.9650
 	- median(# queries): 2800
-100% 13/13 [03:38<00:00, 16.82s/it]
 Targeted black-box attack (momentum=0.90):
 	- success rate: 0.8600
 	- median(# queries): 4400
@@ -57,31 +22,17 @@ cuda:0
 Test accuracy of model 0: 0.8750
 Test accuracy of model 1: 0.8250
 Test accuracy of model 2: 0.7900
-100% 13/13 [00:01<00:00,  9.72it/s]
-100% 13/13 [00:00<00:00, 13.16it/s]
-100% 13/13 [00:00<00:00, 15.00it/s]
 Untargeted attacks' transferability:
 [[0.985 0.57  0.535]
  [0.685 0.965 0.59 ]
  [0.59  0.545 0.95 ]]
-100% 13/13 [00:01<00:00, 10.90it/s]
-100% 13/13 [00:00<00:00, 14.23it/s]
-100% 13/13 [00:00<00:00, 14.90it/s]
 Targeted attacks' transferability:
 [[0.96  0.295 0.275]
  [0.395 0.895 0.275]
  [0.355 0.25  0.86 ]]
-100% 13/13 [00:02<00:00,  6.31it/s]
-100% 13/13 [00:02<00:00,  6.11it/s]
 Ensemble attacks' transferability from models 1+2 to model 0:
 	- untargeted attack: 0.7450
 	- targeted attack: 0.4900
-
-
-Model accuracy before flipping: 0.8250
-Total # weights flipped: 2250
-Max RAD: 0.7030
-RAD>10%: 0.9840
 
 
 Total # weights flipped: 2250

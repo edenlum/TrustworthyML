@@ -65,4 +65,4 @@ sr_targ = compute_attack_success(models[0], x_adv, y, consts.BATCH_SIZE, True, d
 # results
 print('Ensemble attacks\' transferability from models 1+2 to model 0:')
 print(f'\t- untargeted attack: {sr_untarg:0.4f}')
-print(f'\t- targeted attack: {sr_targ:0.4f}')
+(f'\t- targeted attack: {sr_targ:0.4f}')

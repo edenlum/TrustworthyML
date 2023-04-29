@@ -129,37 +129,41 @@ class NESBBoxPGDAttack:
             x_adv = x.clone().detach()
       grad_avg = torch.zeros_like(x)
       queries = torch.zeros(len(x), dtype=torch.int32)
+      nosuccess = torch.ones(len(x), dtype=torch.bool)
       for i in tqdm(range(self.n)):
-            grad = torch.zeros_like(x)
+            print(nosuccess.sum())
+            grad = torch.zeros_like(x[nosuccess])
             for _ in range(self.k):
-                  noise = torch.randn_like(x)
-                  x_pos = torch.clamp(x_adv + self.sigma * noise, 0, 1)
-                  x_neg = torch.clamp(x_adv - self.sigma * noise, 0, 1)
+                  noise = torch.randn_like(x[nosuccess])
+                  x_pos = torch.clamp(x_adv[nosuccess] + self.sigma * noise, 0, 1)
+                  x_neg = torch.clamp(x_adv[nosuccess] - self.sigma * noise, 0, 1)
                   with torch.no_grad():
                         logits_pos = self.model(x_pos)
                         logits_neg = self.model(x_neg)
-                        loss_pos = self.loss_func(logits_pos, y) 
-                        loss_neg = self.loss_func(logits_neg, y)
+                        loss_pos = self.loss_func(logits_pos, y[nosuccess]) 
+                        loss_neg = self.loss_func(logits_neg, y[nosuccess])
                   loss = loss_pos - loss_neg
                   grad += loss.unsqueeze(1).unsqueeze(2).unsqueeze(3) * noise
+                  
+            queries[nosuccess] += 2 * self.k # 2 queries per iteration
             grad /= (2 * self.k * self.sigma)
-            grad_avg = self.momentum * grad_avg + (1 - self.momentum) * grad
+            grad_avg[nosuccess] = self.momentum * grad_avg[nosuccess] + (1 - self.momentum) * grad
             
             if targeted:
-                  x_adv = x_adv - self.alpha * torch.sign(grad_avg)
+                  x_adv[nosuccess] += - self.alpha * torch.sign(grad_avg[nosuccess])
             else:
-                  x_adv = x_adv + self.alpha * torch.sign(grad_avg)
+                  x_adv[nosuccess] += self.alpha * torch.sign(grad_avg[nosuccess])
             
             # projection step
             x_adv = torch.clamp(x_adv, x - self.eps, x + self.eps)
             x_adv = torch.clamp(x_adv, 0, 1)
 
-            # if the attack goal 
-            # early stop
+            # if the attack goal is met on a sample, then stop perturbing it by removing it from the batch
             logits = self.model(x_adv)
-            success = (logits.argmax(1).eq(y) if targeted else logits.argmax(1).ne(y)).all()
-            if self.early_stop and success:
-                  break
+            success = (logits.argmax(1).eq(y) if targeted else logits.argmax(1).ne(y))
+            nosuccess = ~success
+            if self.early_stop and success.all():
+                  break 
 
       assert (x_adv - x).abs().max() <= self.eps + 1e-5
       return x_adv, torch.full((len(x),), i * (2 * self.k + 1))

@@ -198,10 +198,38 @@ class PGDEnsembleAttack:
         self.loss_func = nn.CrossEntropyLoss()
 
     def execute(self, x, y, targeted=False):
-        """
-        Executes the attack on a batch of samples x. y contains the true labels 
-        in case of untargeted attacks, and the target labels in case of targeted 
-        attacks. The method returns the adversarially perturbed samples, which
-        lie in the ranges [0, 1] and [x-eps, x+eps].
-        """
-        pass  # FILL ME
+      """
+      Executes the attack on a batch of samples x. y contains the true labels 
+      in case of untargeted attacks, and the target labels in case of targeted 
+      attacks. The method returns the adversarially perturbed samples, which
+      lie in the ranges [0, 1] and [x-eps, x+eps].
+      """
+      if self.rand_init:
+            x_adv = x + torch.empty_like(x).uniform_(-self.eps, self.eps)
+            x_adv = torch.clamp(x_adv, 0, 1)
+      else:
+            x_adv = x.clone().detach()
+      
+      for i in range(self.n):
+            grad = torch.zeros_like(x_adv)
+            for model in self.models:
+                  with torch.enable_grad():
+                        logits = model(x_adv)
+                        loss = self.loss_func(logits, y)
+                  grad += torch.autograd.grad(loss.sum(), x_adv)[0].detach()
+            
+            if targeted:
+                  x_adv += - self.alpha * torch.sign(grad)
+            else:
+                  x_adv += self.alpha * torch.sign(grad)
+            
+            # projection step
+            x_adv = torch.clamp(x_adv, x - self.eps, x + self.eps)
+            x_adv = torch.clamp(x_adv, 0, 1)
+
+            # early stopping
+            logits = self.models[0](x_adv)
+            success = (logits.argmax(1).eq(y) if targeted else logits.argmax(1).ne(y)).cpu()
+            if self.early_stop and success.all():
+                  break
+

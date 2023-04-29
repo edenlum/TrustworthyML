@@ -82,3 +82,10 @@ Model accuracy before flipping: 0.8250
 Total # weights flipped: 2250
 Max RAD: 0.7030
 RAD>10%: 0.9840
+
+
+Total # weights flipped: 2250
+Max RAD: 0.7273
+RAD>10%: 0.0271
+RAD>15%: 0.0262
+RAD>40%: 0.0218

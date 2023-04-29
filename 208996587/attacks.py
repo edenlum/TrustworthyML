@@ -232,4 +232,6 @@ class PGDEnsembleAttack:
             success = (logits.argmax(1).eq(y) if targeted else logits.argmax(1).ne(y)).cpu()
             if self.early_stop and success.all():
                   break
-
+            
+      assert (x_adv - x).abs().max() <= self.eps + 1e-5
+      return x_adv

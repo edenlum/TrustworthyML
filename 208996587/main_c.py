@@ -44,6 +44,14 @@ for layer_name in layers:
         W.requires_grad = False
         for _ in range(consts.BF_PER_LAYER):
             # FILL ME: flip a random bit in a randomly picked weight, measure RAD, and restore weight
+            w_idx = np.random.randint(0, W.numel())
+            W = W.flatten()
+            w = W[w_idx]
+            new_w, bf_idx = utils.random_bit_flip(w)
+            W[w_idx] = new_w
+            W = W.reshape(layer.weight.shape)
+            layer.weight = torch.nn.Parameter(W)
+            rad = (acc_orig - utils.compute_accuracy(model, data_loader, device))/acc_orig 
             RADs_bf_idx[bf_idx].append(rad)
             RADs_all.append(rad)
 

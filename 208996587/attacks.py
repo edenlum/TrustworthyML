@@ -134,13 +134,14 @@ class NESBBoxPGDAttack:
             for _ in range(self.k):
                   noise = torch.randn_like(x)
                   x_pos = torch.clamp(x_adv + self.sigma * noise, 0, 1)
-                  # x_neg = torch.clamp(x_adv - self.sigma * noise, 0, 1)
+                  x_neg = torch.clamp(x_adv - self.sigma * noise, 0, 1)
                   with torch.no_grad():
                         logits_pos = self.model(x_pos)
-                        # logits_neg = self.model(x_neg)
+                        logits_neg = self.model(x_neg)
                         loss_pos = self.loss_func(logits_pos, y) 
-                        # loss = self.loss_func(logits_neg, y)
-                  grad += loss_pos.unsqueeze(1).unsqueeze(2).unsqueeze(3) * noise
+                        loss_neg = self.loss_func(logits_neg, y)
+                  loss = loss_pos - loss_neg
+                  grad += loss.unsqueeze(1).unsqueeze(2).unsqueeze(3) * noise
             grad /= (2 * self.k * self.sigma)
             grad_avg = self.momentum * grad_avg + (1 - self.momentum) * grad
             
@@ -153,6 +154,7 @@ class NESBBoxPGDAttack:
             x_adv = torch.clamp(x_adv, x - self.eps, x + self.eps)
             x_adv = torch.clamp(x_adv, 0, 1)
 
+            # if the attack goal 
             # early stop
             logits = self.model(x_adv)
             success = (logits.argmax(1).eq(y) if targeted else logits.argmax(1).ne(y)).all()

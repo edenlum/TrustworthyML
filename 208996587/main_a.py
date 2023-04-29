@@ -17,7 +17,6 @@ np.random.seed(consts.SEED)
 
 # GPU available?
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-print(f"Device: {device}")
 
 # load model and dataset
 model = load_pretrained_cnn(0)

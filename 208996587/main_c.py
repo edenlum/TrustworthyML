@@ -60,9 +60,6 @@ RADs_all = np.array(RADs_all)
 print(f'Total # weights flipped: {len(RADs_all)}')
 print(f'Max RAD: {np.max(RADs_all):0.4f}')
 print(f'RAD>10%: {np.sum(RADs_all>0.1)/RADs_all.size:0.4f}')
-print(f'RAD>15%: {np.sum(RADs_all>0.15)/RADs_all.size:0.4f}')
-# find minimum amount of bits to flip to get RAD>10%
-(RADs_all>0.1).nonzero()[0].shape[0]
             
 # boxplots: bit-flip index vs. RAD
 plt.figure()

@@ -30,7 +30,7 @@ for i, model in enumerate(models):
     print(f'Test accuracy of model {i}: {acc:0.4f}')
 
 # init attacks
-attacks = [PGDAttack(models[i], eps=8/255., loss='ce', early_stop=False) for i in range(3)]
+attacks = [PGDAttack(models[i], eps=8/255., early_stop=False) for i in range(3)]
 
 # untargeted attacks
 transfer_success = np.zeros((3,3))
@@ -55,7 +55,7 @@ with np.printoptions(precision=4):
     print(transfer_success)
 
 # ensemble attacks against model 0
-attack = PGDEnsembleAttack(models[1:], eps=8/255., loss='ce', early_stop=False)
+attack = PGDEnsembleAttack(models[1:], eps=8/255., early_stop=False)
 # untargeted attacks
 x_adv, y = run_whitebox_attack(attack, data_loader, False, device)
 sr_untarg = compute_attack_success(models[0], x_adv, y, consts.BATCH_SIZE, False, device)
@@ -65,4 +65,4 @@ sr_targ = compute_attack_success(models[0], x_adv, y, consts.BATCH_SIZE, True, d
 # results
 print('Ensemble attacks\' transferability from models 1+2 to model 0:')
 print(f'\t- untargeted attack: {sr_untarg:0.4f}')
-(f'\t- targeted attack: {sr_targ:0.4f}')
+print(f'\t- targeted attack: {sr_targ:0.4f}')

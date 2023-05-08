@@ -211,6 +211,7 @@ class PGDEnsembleAttack:
             x_adv = x.clone().detach()
       
       for i in range(self.n):
+            x_adv.requires_grad_()
             grad = torch.zeros_like(x_adv)
             for model in self.models:
                   with torch.enable_grad():
@@ -219,9 +220,9 @@ class PGDEnsembleAttack:
                   grad += torch.autograd.grad(loss.sum(), x_adv)[0].detach()
             
             if targeted:
-                  x_adv += - self.alpha * torch.sign(grad)
+                  x_adv = x_adv - self.alpha * torch.sign(grad)
             else:
-                  x_adv += self.alpha * torch.sign(grad)
+                  x_adv = x_adv + self.alpha * torch.sign(grad)
             
             # projection step
             x_adv = torch.clamp(x_adv, x - self.eps, x + self.eps)

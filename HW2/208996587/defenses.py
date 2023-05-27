@@ -35,16 +35,34 @@ def free_adv_train(model, data_tr, criterion, optimizer, lr_scheduler, \
                            
 
     # init delta (adv. perturbation) - FILL ME
-    
+    delta = torch.zeros(batch_size, 3, 32, 32, device=device)
 
     # total number of updates - FILL ME
-    
+    total_updates = epochs // m
 
     # when to update lr
     scheduler_step_iters = int(np.ceil(len(data_tr)/batch_size))
 
     # train - FILLE ME
-    
+    for epoch in range(epochs):  # loop over the dataset multiple times
+        for i, data in enumerate(loader_tr, 0):
+            # get inputs and labels
+            inputs, labels = data[0].to(device), data[1].to(device)
+            for j in range(m):
+                # zero the parameter gradients
+                optimizer.zero_grad()
+
+                # forward + backward + optimize
+                x_adv = inputs + delta
+                x_adv.requires_grad_()
+                preds = model(x_adv)
+                loss = criterion(preds, labels)
+                loss.backward()
+                optimizer.step()
+
+                # update delta
+                delta += eps * torch.sign(torch.autograd.grad(loss, x_adv)[0])
+                delta = torch.clamp(delta, -eps, eps)
     
     # done
     return model

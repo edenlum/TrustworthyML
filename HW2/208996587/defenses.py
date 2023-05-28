@@ -167,6 +167,7 @@ class NeuralCleanse:
         - trigger: 
         """
         # randomly initialize mask and trigger in [0,1] - FILL ME
+        print(f"self.dim {self.dim}")
         mask = torch.rand(self.dim, device=device)
         mask.requires_grad_()
         trigger = torch.rand(self.dim, device=device)
@@ -177,9 +178,12 @@ class NeuralCleanse:
             for x, y in data_loader:
                 x = x.to(device)
                 # override y to one-hot vector of target class c_t
-                y = torch.zeros_like(y, device=device)
+                y = torch.zeros((x.shape[0], self.model.fc3.out_features), device=device)
+                print(y.shape)
                 y[:, c_t] = 1
                 self.model.zero_grad()
+                mask.grad = None
+                trigger.grad = None
 
                 loss = self.loss_func(self.model((1 - mask) * x + mask * trigger), y)
                 loss += self.lambda_c * torch.norm(mask)

@@ -90,9 +90,10 @@ class SmoothedModel():
         max confidence).
         """
         counts = torch.zeros(self.model.fc3.out_features)
-        for i in range(n // batch_size):
-            noise_shape = (batch_size,) + x.shape[1:]
-            noise = torch.randn(noise_shape, device=x.device) * self.sigma
+
+        for i in range(0, n, batch_size): 
+            size = min(batch_size, n - i)
+            noise = torch.randn((size,1,1,1), device=x.device) * self.sigma
             preds = self.model(x + noise).detach().cpu().numpy()
             preds = np.argmax(preds, axis=1)
             for p in preds:

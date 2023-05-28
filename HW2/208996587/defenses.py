@@ -48,20 +48,21 @@ def free_adv_train(model, data_tr, criterion, optimizer, lr_scheduler, \
         for i, data in enumerate(loader_tr, 0):
             # get inputs and labels
             inputs, labels = data[0].to(device), data[1].to(device)
+            b = inputs.shape[0] # real batch size in case last batch is different
             for j in range(m):
                 # zero the parameter gradients
                 optimizer.zero_grad()
 
                 # forward + backward + optimize
-                x_adv = inputs + delta
+                x_adv = inputs + delta[:b]
                 x_adv.requires_grad_()
                 preds = model(x_adv)
                 loss = criterion(preds, labels)
-                loss.backward()
+                loss.backward(retain_graph=True)
                 optimizer.step()
 
                 # update delta
-                delta += eps * torch.sign(torch.autograd.grad(loss, x_adv)[0])
+                delta[:b] += eps * torch.sign(torch.autograd.grad(loss, x_adv)[0])
                 delta = torch.clamp(delta, -eps, eps)
     
     # done
@@ -88,8 +89,16 @@ class SmoothedModel():
         array counting how many times each class was assigned the
         max confidence).
         """
-        # FILL ME
-        pass
+        counts = torch.zeros(self.model.fc3.out_features)
+        for i in range(n // batch_size):
+            noise_shape = (batch_size,) + x.shape[1:]
+            noise = torch.randn(noise_shape, device=x.device) * self.sigma
+            preds = self.model(x + noise).detach().cpu().numpy()
+            preds = np.argmax(preds, axis=1)
+            for p in preds:
+                counts[p] += 1
+        return counts
+
         
     def certify(self, x, n0, n, alpha, batch_size):
         """
@@ -108,11 +117,17 @@ class SmoothedModel():
         """
         
         # find prediction (top class c) - FILL ME
-        
+        counts0 = self._sample_under_noise(x, n0, batch_size)
+        c_a = np.argmax(counts0)        
         
         # compute lower bound on p_c - FILL ME
-        
+        counts = self._sample_under_noise(x, n, batch_size)
+        p_a = proportion_confint(counts[c_a].item(), n, alpha=2*alpha, method="beta")[0]
 
+        if p_a > 0.5:
+            c, radius = c_a, norm.ppf(p_a)*self.sigma
+        else:
+            c, radius = self.ABSTAIN, 0
         # done
         return c, radius
         
@@ -152,10 +167,27 @@ class NeuralCleanse:
         - trigger: 
         """
         # randomly initialize mask and trigger in [0,1] - FILL ME
-        
+        mask = torch.rand(self.dim, device=device)
+        mask.requires_grad_()
+        trigger = torch.rand(self.dim, device=device)
+        trigger.requires_grad_()
 
         # run self.niters of SGD to find (potential) trigger and mask - FILL ME
-        
+        for i in range(self.niters):
+            for x, y in data_loader:
+                x = x.to(device)
+                # override y to one-hot vector of target class c_t
+                y = torch.zeros_like(y, device=device)
+                y[:, c_t] = 1
+                self.model.zero_grad()
+
+                loss = self.loss_func(self.model((1 - mask) * x + mask * trigger), y)
+                loss += self.lambda_c * torch.norm(mask)
+                loss.backward()
+                mask.data -= self.step_size * mask.grad
+                trigger.data -= self.step_size * trigger.grad
+                mask.data = torch.clamp(mask.data, 0, 1)
+                trigger.data = torch.clamp(trigger.data, 0, 1)
 
         # done
         return mask, trigger

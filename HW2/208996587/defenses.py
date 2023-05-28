@@ -167,20 +167,20 @@ class NeuralCleanse:
         - trigger: 
         """
         # randomly initialize mask and trigger in [0,1] - FILL ME
-        print(f"self.dim {self.dim}")
-        mask = torch.rand(self.dim, device=device)
+        mask_dim = (1, 1, self.dim[2], self.dim[3])
+        mask = torch.rand(mask_dim, device=device)
         mask.requires_grad_()
         trigger = torch.rand(self.dim, device=device)
         trigger.requires_grad_()
 
         # run self.niters of SGD to find (potential) trigger and mask - FILL ME
-        for i in range(self.niters):
+        i = 0
+        while(i < self.niters):
             for x, y in data_loader:
+                i += 1
                 x = x.to(device)
-                # override y to one-hot vector of target class c_t
-                y = torch.zeros((x.shape[0], self.model.fc3.out_features), device=device)
-                print(y.shape)
-                y[:, c_t] = 1
+                # override y to target class c_t
+                y = torch.ones_like(y, device=device) * c_t
                 self.model.zero_grad()
                 mask.grad = None
                 trigger.grad = None
@@ -188,10 +188,10 @@ class NeuralCleanse:
                 loss = self.loss_func(self.model((1 - mask) * x + mask * trigger), y)
                 loss += self.lambda_c * torch.norm(mask)
                 loss.backward()
-                mask.data -= self.step_size * mask.grad
-                trigger.data -= self.step_size * trigger.grad
+                mask.data -= self.step_size * torch.sign(mask.grad)
+                trigger.data -= self.step_size * torch.sign(trigger.grad)
                 mask.data = torch.clamp(mask.data, 0, 1)
                 trigger.data = torch.clamp(trigger.data, 0, 1)
 
         # done
-        return mask, trigger
+        return mask.repeat(1,3,1,1), trigger

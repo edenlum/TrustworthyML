@@ -59,10 +59,12 @@ def plot_radii(radii):
     x = [] # radius
     y = [] # accuracy
     # derive x and y from the certified radii - FILL ME
+    print(len(radii), len(set(radii)))
     sorted_radii = sorted(radii)
     for i, radius in enumerate(sorted_radii):
-        x.append(radius)
-        y.append((len(sorted_radii) - i)/len(sorted_radii))
+        if radius != 0:
+            x.append(radius)
+            y.append((len(sorted_radii) - i)/len(sorted_radii))
     
     # plot
     plt.plot(x,y)
